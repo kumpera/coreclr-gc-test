@@ -137,12 +137,13 @@ class RFLogging
         {
             try
             {
-                string logFilename = logDirectory + "\\instrmentation.log";
+                string logFilename = Path.Combine (logDirectory, "instrmentation.log");
                 while (File.Exists(logFilename))
                 {
-                    logFilename = logDirectory + "\\instrmentation.log-" + DateTime.Now.ToString().Replace('/', '-').Replace(':', '.');
+                    logFilename = Path.Combine (logDirectory, "instrmentation.log-" + DateTime.Now.ToString().Replace('/', '-').Replace(':', '.'));
                 }
 
+				Directory.CreateDirectory (Path.GetDirectoryName (logFilename));
                 instrumentationLogFile = File.Open(logFilename, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite);
             }
             catch
@@ -179,7 +180,7 @@ class RFLogging
             {
                 fRetry = false;
 
-                string safeName = logDirectory + "\\" + name.Replace('\\', ' ').Replace('*', ' ').Replace('?', ' ').Replace('>', ' ').Replace('<', ' ').Replace('|', ' ').Replace(':', ' ').Replace('/', ' ').Replace('"', ' ');
+                string safeName = Path.Combine (logDirectory, name.Replace('\\', ' ').Replace('*', ' ').Replace('?', ' ').Replace('>', ' ').Replace('<', ' ').Replace('|', ' ').Replace(':', ' ').Replace('/', ' ').Replace('"', ' '));
                 filename = safeName + ".log";
                 if (File.Exists(filename))
                 {
@@ -187,6 +188,7 @@ class RFLogging
                 }
                 try
                 {
+					Directory.CreateDirectory (Path.GetDirectoryName (filename));
                     logFile = File.Open(filename, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite);
                 }
                 catch (IOException e)

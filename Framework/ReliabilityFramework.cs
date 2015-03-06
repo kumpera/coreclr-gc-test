@@ -38,9 +38,9 @@ class CustomAssemblyResolver : AssemblyLoadContext
 
         string strBVTRoot = Environment.GetEnvironmentVariable("BVT_ROOT");
         if (String.IsNullOrEmpty(strBVTRoot))
-            strBVTRoot = Directory.GetCurrentDirectory() + "\\Tests";
+            strBVTRoot = Path.Combine(Directory.GetCurrentDirectory(), "Tests");
 
-        string strPath = strBVTRoot + "\\" + assemblyName.Name + ".exe";
+        string strPath = Path.Combine(strBVTRoot, assemblyName.Name + ".exe");
 
         Console.WriteLine("Incoming AssemblyName: {0}\n", assemblyName.ToString());
         Console.WriteLine("Trying to Load: {0}\n", strPath);
@@ -107,6 +107,11 @@ public class ReliabilityFramework
     // constants
     const string waitingText = "Waiting for all tests to finish loading, Remaining Tests: ";
 
+	static void InitUnixEnv ()
+	{
+		Environment.SetEnvironmentVariable ("NUMBER_OF_PROCESSORS", Environment.ProcessorCount.ToString ());
+	}
+
     /// <summary>
     /// Our main execution routine for the reliability framework.  Here we create an instance of the framework & run the reliability tests
     /// in it.  All code in here will execute in our starting app domain.
@@ -119,6 +124,8 @@ public class ReliabilityFramework
         bool okToContinue = true, doReplay = false;
         string sTests = "tests", sSeed = "seed";
 
+		InitUnixEnv ();
+		
         ReliabilityFramework rf = new ReliabilityFramework();
         rf.logger.WriteToInstrumentationLog(null, LoggingLevels.StartupShutdown, "Started");
 #if !PROJECTK_BUILD
@@ -420,6 +427,7 @@ public class ReliabilityFramework
 
                         //for the process loader we just need
                         //to fill in some details (such as the full path).
+						Console.WriteLine ("--- preloading");
                         TestPreLoader(test, testSet.DiscoveryPaths);
                         if (test.TestObject == null)
                         {
@@ -487,7 +495,7 @@ public class ReliabilityFramework
             if (doReplay)
             {
                 Console.WriteLine("Replaying from log file {0}.log", curTestSet.FriendlyName);
-                ExecuteFromLog("Logs\\" + curTestSet.FriendlyName + ".log");
+                ExecuteFromLog(Path.Combine ("Logs", curTestSet.FriendlyName + ".log"));
             }
             else
             {
@@ -635,9 +643,9 @@ public class ReliabilityFramework
         if (myProcessName == null)
         {
             myProcessName = System.Windows.Forms.Application.ExecutablePath;
-            if (myProcessName.LastIndexOf("\\") != -1)
+            if (myProcessName.LastIndexOf(Path.SeparatorPath) != -1)
             {
-                myProcessName = myProcessName.Substring(myProcessName.LastIndexOf("\\") + 1);
+                myProcessName = myProcessName.Substring(myProcessName.LastIndexOf(Path.SeparatorPath) + 1);
                 if (myProcessName.LastIndexOf(".") != -1)
                 {
                     myProcessName = myProcessName.Substring(0, myProcessName.LastIndexOf("."));
@@ -1523,6 +1531,7 @@ public class ReliabilityFramework
     /// <returns>true if the test was successfully loaded & executed, false otherwise.</returns>
     void TestPreLoader(ReliabilityTest test, string[] paths)
     {
+		Console.WriteLine ("--- " + test.PreCommands);
         try
         {
             RunCommands(test.PreCommands, "pre", test);
@@ -1531,6 +1540,7 @@ public class ReliabilityFramework
             {
 
                 case TestStartModeEnum.ProcessLoader:
+				Console.WriteLine ("---proc load ");
                     TestPreLoader_Process(test, paths);
                     break;
                 case TestStartModeEnum.AppDomainLoader:
@@ -1686,6 +1696,7 @@ public class ReliabilityFramework
         Console.WriteLine("Preloading for process mode");
 
         string realpath = ReliabilityConfig.ConvertPotentiallyRelativeFilenameToFullPath(test.BasePath, test.Assembly);
+		Console.WriteLine ("path0 "+realpath);
         Debug.Assert(test.TestObject == null);
         if (File.Exists(realpath))
         {

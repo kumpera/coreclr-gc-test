@@ -988,6 +988,7 @@ public class ReliabilityConfig : IEnumerable, IEnumerator
     {
         string trimmedPath = path.Trim();	// remove excess whitespace.
 
+		Console.WriteLine ("ZZ ({0}) x ({1})", basepath,path);
 #if PROJECTK_BUILD
         if (String.Compare("file://", 0, trimmedPath, 0, 7, StringComparison.OrdinalIgnoreCase) == 0)	// strip file:// from the front if it exists.
 #else
@@ -1003,13 +1004,13 @@ public class ReliabilityConfig : IEnumerable, IEnumerator
         }
 
 
-        if (basepath.LastIndexOf("\\") == (basepath.Length - 1))
+        if (basepath.LastIndexOf(Path.PathSeparator) == (basepath.Length - 1))
         {
             return (basepath + trimmedPath);
         }
         else
         {
-            return (basepath + "\\" + trimmedPath);
+            return Path.Combine(basepath, trimmedPath);
         }
     }
 

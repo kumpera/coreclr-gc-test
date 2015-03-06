@@ -283,7 +283,7 @@ public class ReliabilityTest
 #if PROJECTK_BUILD
                 string strBVTRoot = Environment.GetEnvironmentVariable("BVT_ROOT");
                 if (String.IsNullOrEmpty(strBVTRoot))
-                    return (Directory.GetCurrentDirectory() + "\\Tests");
+                    return Path.Combine(Directory.GetCurrentDirectory(), "Tests");
                 else
                     return strBVTRoot;
 #else
@@ -293,9 +293,9 @@ public class ReliabilityTest
 
             if (basePath.Length > 0)
             {
-                if (basePath[basePath.Length - 1] != '\\')
+                if (basePath[basePath.Length - 1] != Path.PathSeparator)
                 {
-                    basePath = basePath + "\\";
+                    basePath = basePath + Path.PathSeparator;
                 }
             }
             return (basePath);
@@ -321,7 +321,7 @@ public class ReliabilityTest
             // first, check the current directory
             string curDir = Directory.GetCurrentDirectory();
             string theAnswer;
-            if (File.Exists(theAnswer = String.Format("{0}\\{1}", curDir, debugger)))
+            if (File.Exists(theAnswer = Path.Combine (curDir, debugger)))
             {
                 return (theAnswer);
             }
@@ -336,7 +336,7 @@ public class ReliabilityTest
             string[] splitPath = path.Split(new char[] { ';' });
             foreach (string curPath in splitPath)
             {
-                if (File.Exists(theAnswer = String.Format("{0}\\{1}", curPath, debugger)))
+                if (File.Exists(theAnswer = Path.Combine (curPath, debugger)))
                 {
                     return (theAnswer);
                 }
